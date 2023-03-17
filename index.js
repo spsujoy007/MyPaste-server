@@ -17,7 +17,12 @@ async function run () {
     try{
         const notesCollection = client.db('MyPaste').collection('notes');
         
-        
+        // add a new note 
+        app.post('/addnote', async(req, res) => {
+            const addNoteBody = req.body;
+            const result = await notesCollection.insertOne(addNoteBody)
+            res.send(result)
+        })
 
         app.get('/notes', async(req, res) => {
             const notes = await notesCollection.find({}).toArray()
