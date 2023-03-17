@@ -1,5 +1,5 @@
 const express = require('express')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 const app = express()
 const port = process.env.PORT || 5000
@@ -24,9 +24,22 @@ async function run () {
             res.send(result)
         })
 
+        //to get all notes
         app.get('/notes', async(req, res) => {
-            const notes = await notesCollection.find({}).toArray()
+            const notes = await notesCollection.find({}).sort({_id: -1}).toArray()
             res.send(notes)
+        })
+
+        // get single note 
+        
+
+        // to delete an note 
+        app.delete('/deletenote', async(req, res) => {
+            const id = req.query.id;
+            console.log(id)
+            const query = { _id: new ObjectId(id)}
+            const result = await notesCollection.deleteOne(query);
+            res.send(result)
         })
     }
     finally{
