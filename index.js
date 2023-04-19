@@ -29,7 +29,8 @@ async function run () {
         app.get('/notes', async(req, res) => {
             const email = req.query.email;
             const query = {email: email}
-            const notes = await notesCollection.find(query).sort({_id: -1}).toArray()
+            const sortingdata = {_id: -1, "copied_count": -1}
+            const notes = await notesCollection.find(query).sort({_id: -1, "copied_count": -1}).toArray()
             res.send(notes)
         })
 
