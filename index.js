@@ -23,7 +23,7 @@ async function run () {
             const addNoteBody = req.body;
             const result = await notesCollection.insertOne(addNoteBody)
             res.send(result)
-        })
+        }) 
 
         //to get all notes
         app.get('/notes', async(req, res) => {
