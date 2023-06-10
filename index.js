@@ -5,6 +5,8 @@ const app = express()
 const port = process.env.PORT || 5000
 require('dotenv').config()
 
+// PORT: https://mypaste.vercel.app/ 
+
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.6ke0m0t.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
@@ -24,6 +26,21 @@ async function run () {
             const result = await notesCollection.insertOne(addNoteBody)
             res.send(result)
         }) 
+
+        app.post('/editnote', async (req, res) => {
+            const id = req.query.id;
+            const modifiedNote = req.body;
+            const filter = {_id: new ObjectId(id)};
+            const option = {upsert: true}
+            const updatedDoc = {
+                $set: {
+                    title: modifiedNote.title,
+                    note: modifiedNote.note
+                }
+            }
+            const result = await notesCollection.updateOne(filter, updatedDoc, option)
+            res.send(result)
+        })
 
         //to get all notes
         app.get('/notes', async(req, res) => {
