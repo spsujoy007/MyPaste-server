@@ -15,9 +15,20 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 app.use(cors())
 app.use(express.json())
 
+const warning_info = {
+    "error": "not a valid user", 
+    "warning": "Do not use mypaste api without our permission!", 
+    "owner-info": {
+        "Phone": "01859342364",
+        "Whatsapp": "01859342364",
+        "Facebook": "https://www.facebook.com/spsujoy07"
+    }
+}
+
 async function run () {
     try{
-        const notesCollection = client.db('MyPaste').collection('notes');
+        // const notesCollection = client.db('MyPaste').collection('notes');
+        const notesCollection = client.db('MyPaste').collection('mynotes');
         const pinNotesCollection = client.db('MyPaste').collection('pinNotes');
         
         // add a new note 
@@ -42,14 +53,63 @@ async function run () {
             res.send(result)
         })
 
-        //to get all notes
+        //to get all notes of one account
         app.get('/notes', async(req, res) => {
             const email = req.query.email;
+            const useruid = req.query.uid;
             const query = {email: email}
             const sortingdata = {_id: -1, "copied_count": -1}
-            const notes = await notesCollection.find(query).sort({copied_count: -1, _id: -1}).toArray()
-            res.send(notes)
+            const notes = await notesCollection.find(query).sort({ _id: -1}).toArray()
+            if(useruid)
+            {
+                res.send(notes)
+            }
+            else{
+                res.json(warning_info);
+            }
         })
+        app.get('/sortednotes', async(req, res) => {
+            const email = req.query.email;
+            const useruid = req.query.uid;
+            const query = {email: email}
+            const sortingdata = {_id: -1, "copied_count": -1}
+            const notes = await notesCollection.find(query).sort({copied_count: -1}).toArray()
+            if(useruid)
+            {
+                res.send(notes)
+            }
+            else{
+                res.json(warning_info);
+            }
+        })
+
+        //to get all notes 
+        app.get('/allnotes', async(req, res) => {
+            const useruid = req.query.uid;
+            const query = {}
+            const notes = await notesCollection.find(query).toArray()
+            if(useruid)
+            {
+                res.send(notes)
+            }
+            else{
+                res.json(warning_info)
+            }
+        })
+
+        //get the highest noter
+        // app.get('/highestnoter', async(req, res) => {
+        //     const useruid = req.query.uid;
+        //     const query = {}
+        //     const notes = await notesCollection.find(query).toArray()
+        //     if(useruid)
+        //     {
+        //         res.send(notes)
+        //     }
+        //     else{
+        //         res.json(warning_info)
+        //     }
+        // })
 
         // get single note 
         app.get('/note/:id', async(req, res) => {
@@ -58,6 +118,15 @@ async function run () {
             const result = await notesCollection.findOne(query);
             res.send(result)
         })
+
+        // get single note for only same page
+        app.get('/singlenote', async(req, res) => {
+            const id = req.query.id;
+            const query = {_id: new ObjectId(id)}
+            const result = await notesCollection.findOne(query);
+            res.send(result)
+        })
+        
 
         // to delete an note 
         app.delete('/deletenote', async(req, res) => {
@@ -89,7 +158,7 @@ async function run () {
             const result = await notesCollection.find(filterEmail).toArray()
             res.send(result)
         })
-
+        
         // un pin a note
         app.put('/removePin', async(req, res) => {
             const id = req.query.id;
